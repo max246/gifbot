@@ -18,6 +18,21 @@ class GifBot(object):
 		for elem in self.skype.BookmarkedChats:
 		   print elem.Topic
 
+	def getUrban(self, search):
+                r = requests.get("http://www.urbandictionary.com/define.php?term="+search)
+
+                bs = BeautifulSoup.BeautifulSoup(r.text)
+
+                urban = bs.findAll('div', {'class':'meaning'})
+
+                total = len(urban)
+                if total > 0:
+                        return urban[0].text
+                else:
+                        return "Nothing bro... google it!"
+
+		
+
 	def getGif(self, search):
 		#r = requests.get("http://giphy.com/search/"+search)
 		r = requests.get("http://www.reddit.com/r/gifs/search?q="+search+"+url%3A*.gif&sort=relevance&t=all")
@@ -46,6 +61,12 @@ class GifBot(object):
 				typeGif = match.group(1)
 				urlGif = self.getGif(typeGif)
 				msg.Chat.SendMessage(urlGif)
+			else:
+                                match = re.match("@urban (.*)" , msg.Body, re.IGNORECASE)
+                                if match:
+                                        urban = match.group(1)
+                                        meaning = self.getUrban(urban)
+                                        msg.Chat.SendMessage(meaning)
 			
 if __name__ == "__main__":
   bot = GifBot()
